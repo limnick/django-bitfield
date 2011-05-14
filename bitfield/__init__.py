@@ -167,7 +167,7 @@ class BitHandler(object):
         return BitHandler(self._value ^ int(value), self._keys)
 
     def __contains__(self, key):
-        bit_number = self._keys.index(key)
+        bit_number = list(self._keys).index(key)
         return bool(self.get_bit(bit_number))
 
     def __getattr__(self, key):
@@ -175,14 +175,14 @@ class BitHandler(object):
             return object.__getattribute__(self, key)
         if key not in self._keys:
             raise AttributeError('%s is not a valid flag' % key)
-        return self.get_bit(self._keys.index(key))
+        return self.get_bit(list(self._keys).index(key))
 
     def __setattr__(self, key, value):
         if key.startswith('_'):
             return object.__setattr__(self, key, value)
         if key not in self._keys:
             raise AttributeError('%s is not a valid flag' % key)
-        self.set_bit(self._keys.index(key), value)
+        self.set_bit(list(self._keys).index(key), value)
 
     def __iter__(self):
         return self.iteritems()
@@ -238,11 +238,11 @@ class BitFieldFlags(object):
     def __getattr__(self, key):
         if key not in self._flags:
             raise AttributeError
-        return Bit(self._flags.index(key))
+        return Bit(list(self._flags).index(key))
 
     def iteritems(self):
         for flag in self._flags:
-            yield flag, Bit(self._flags.index(flag))
+            yield flag, Bit(list(self._flags).index(flag))
 
     def iterkeys(self):
         for flag in self._flags:
@@ -250,7 +250,7 @@ class BitFieldFlags(object):
 
     def itervalues(self):
         for flag in self._flags:
-            yield Bit(self._flags.index(flag))
+            yield Bit(list(self._flags).index(flag))
 
     def items(self):
         return list(self.iteritems())
