@@ -2,7 +2,6 @@
 django-bitfield
 ~~~~~~~~~~~~~~~
 """
-from Crypto.Random.random import choice
 
 try:
     VERSION = __import__('pkg_resources') \
@@ -242,9 +241,6 @@ class BitFormField(forms.MultipleChoiceField):
 
         super(BitFormField, self).__init__(choices=choices, required=required, widget=widget, label=label,
                                         initial=initial, help_text=help_text, *args, **kwargs)
-    
-        
-        #self._set_choices(kwargs.get('choices', []))
 
     def clean(self, value):
         if isinstance(value, list):
@@ -395,16 +391,9 @@ class BitField(BigIntegerField):
 
     def __init__(self, flags, *args, **kwargs):
         kwargs['choices']= enumerate(x[1] for x in flags)
-        
-        #if kwargs.has_key('default'):
-        #    kwargs['default'] = [kwargs['default']]
-        
+
         BigIntegerField.__init__(self, *args, **kwargs)
-        self.flags = [x[0] for x in flags]
-        
-        #if self.choices:
-        #    raise Exception(self.choices.next())
-        
+        self.flags = [x[0] for x in flags]       
 
     def south_field_triple(self):
         "Returns a suitable description of this field for South."
@@ -439,14 +428,8 @@ class BitField(BigIntegerField):
                              'error_messages', 'show_hidden_initial'):
                     del kwargs[k]
         defaults.update(kwargs)
-        #return form_class(**defaults)
-        #defaults = {
-            #'choices': enumerate(self.flags),
-        #    'widget': forms.CheckboxSelectMultiple,
-        #}
-        #kwargs.update(defaults)
+        
         return BitFormField(**defaults)
-        #return Field.formfield(self, form_class, **kwargs)
 
     def pre_save(self, instance, add):
         value = getattr(instance, self.attname)
