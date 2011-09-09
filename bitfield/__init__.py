@@ -150,7 +150,10 @@ class BitHandler(object):
 
     def __nonzero__(self):
         return bool(self._value)
-
+    
+    def __len__(self):
+        return len(self._keys)
+        
     def __and__(self, value):
         return BitHandler(self._value & int(value), self._keys)
 
@@ -238,10 +241,10 @@ class BitFormField(forms.MultipleChoiceField):
     
     def __init__(self, choices=(), required=True, widget=None, label=None,
                  initial=None, help_text=None, *args, **kwargs):
-
-        super(BitFormField, self).__init__(choices=choices, required=required, widget=widget, label=label,
-                                        initial=initial, help_text=help_text, *args, **kwargs)
-
+        
+        super(BitFormField, self).__init__(choices=choices, required=required, widget=widget, 
+                            label=label, initial=initial, help_text=help_text, *args, **kwargs)
+    
     def clean(self, value):
         if isinstance(value, list):
             value = [int(x) for x in value]
@@ -256,7 +259,6 @@ class BitFormField(forms.MultipleChoiceField):
                 z = 1<<x
                 if value < z:
                     break
-                
                 if (value & z):
                     new_value.append(smart_unicode(x))
             value = new_value
@@ -389,11 +391,11 @@ class BitFieldMeta(LegacyConnection):
 class BitField(BigIntegerField):
     __metaclass__ = BitFieldMeta
 
-    def __init__(self, flags, *args, **kwargs):
-        kwargs['choices']= enumerate(x[1] for x in flags)
-
+    def __init__(self, flags,  *args, **kwargs):
+        kwargs['choices']= enumerate(x for x in flags)
+        
         BigIntegerField.__init__(self, *args, **kwargs)
-        self.flags = [x[0] for x in flags]       
+        self.flags = flags
 
     def south_field_triple(self):
         "Returns a suitable description of this field for South."
@@ -401,7 +403,7 @@ class BitField(BigIntegerField):
         field_class = "django.db.models.fields.BigIntegerField"
         args, kwargs = introspector(self)
         return (field_class, args, kwargs)
-
+    
     def formfield(self, form_class=BitFormField, **kwargs):
         
         defaults = {'required': not self.blank, 'label': capfirst(self.verbose_name), 'help_text': self.help_text}
@@ -413,8 +415,9 @@ class BitField(BigIntegerField):
                 defaults['initial'] = self.get_default()
         if self.choices:
             # Fields with choices get special treatment.
-            include_blank = self.blank or not (self.has_default() or 'initial' in kwargs)
-            defaults['choices'] = self.get_choices(include_blank=include_blank)
+            #include_blank = self.blank or not (self.has_default() or 'initial' in kwargs)
+            choices = self.get_choices(include_blank=False)
+            defaults['choices'] = [(c[0], c[1].replace('_', ' ')) for c in choices]
             #defaults['coerce'] = self.to_python
             if self.null:
                 defaults['empty_value'] = None
@@ -427,6 +430,7 @@ class BitField(BigIntegerField):
                              'widget', 'label', 'initial', 'help_text',
                              'error_messages', 'show_hidden_initial'):
                     del kwargs[k]
+        
         defaults.update(kwargs)
         
         return BitFormField(**defaults)
