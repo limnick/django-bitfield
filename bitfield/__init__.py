@@ -419,8 +419,8 @@ class BitField(BigIntegerField):
             choices = self.get_choices(include_blank=False)
             defaults['choices'] = [(c[0], c[1].replace('_', ' ')) for c in choices]
             #defaults['coerce'] = self.to_python
-            if self.null:
-                defaults['empty_value'] = None
+            #if self.null:
+            #    defaults['empty_value'] = None
             #form_class = forms.TypedChoiceField
             # Many of the subclass-specific formfield arguments (min_value,
             # max_value) don't apply for choice fields, so be sure to only pass
